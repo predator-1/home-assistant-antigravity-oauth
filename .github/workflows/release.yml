@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches manifest version
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('custom_components/antigravity/manifest.json'))['version'])")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != manifest $version"; exit 1; }
+      - uses: astral-sh/setup-uv@v6
+      - run: uv venv --python 3.14 && uv pip install -r requirements_test.txt
+      - run: .venv/bin/pytest -q
+      - name: Package
+        run: cd custom_components/antigravity && zip -r -X "$GITHUB_WORKSPACE/antigravity.zip" . -x '*__pycache__*'
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/release_notes.py "$GITHUB_REF_NAME" > notes.md
+          gh release create "$GITHUB_REF_NAME" antigravity.zip --title "$GITHUB_REF_NAME" --notes-file notes.md
