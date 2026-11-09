@@ -1,0 +1,49 @@
+{
+  "config": {
+    "step": {
+      "authorize": {
+        "title": "Sign in to Antigravity",
+        "description": "1. Open the [Google sign-in page]({auth_url}) and sign in with the account that has the Antigravity subscription.\n2. Google then redirects to `{redirect_uri}`. That page does not load; this is expected.\n3. Copy the whole address from the browser's address bar and paste it below.",
+        "data": {
+          "redirect_url": "Redirect URL"
+        },
+        "data_description": {
+          "redirect_url": "The full `{redirect_uri}?...` address, or just the value of its `code` parameter."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sign in again",
+        "description": "The sign-in for {name} expired or was revoked. Sign in again to keep using Antigravity."
+      }
+    },
+    "error": {
+      "invalid_auth": "Sign-in failed. The code may have expired or been used already; open the sign-in page again and paste the new address.",
+      "cannot_connect": "Could not reach Google.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "not_eligible": "This Google account has no Antigravity subscription.",
+      "reauth_successful": "Signed in again.",
+      "wrong_account": "You signed in with a different Google account than the one configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "remaining": {
+        "name": "{group} {window} remaining"
+      },
+      "reset": {
+        "name": "{group} {window} reset"
+      }
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "Authentication failed: {error}"
+    },
+    "update_failed": {
+      "message": "Error talking to Antigravity: {error}"
+    }
+  }
+}

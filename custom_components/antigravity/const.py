@@ -10,6 +10,15 @@ import platform
 import uuid
 
 DOMAIN = "antigravity"
+DEFAULT_TITLE = "Antigravity"
+
+CONF_ACCESS_TOKEN = "access_token"
+CONF_REFRESH_TOKEN = "refresh_token"
+CONF_EXPIRES_AT = "expires_at"
+CONF_PROJECT_ID = "project_id"
+CONF_EMAIL = "email"
+CONF_TIER = "tier"
+CONF_REDIRECT_URL = "redirect_url"
 
 CLI_VERSION = "1.5.3"
 

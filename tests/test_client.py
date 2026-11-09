@@ -85,7 +85,7 @@ class FakeUpstream:
 
 
 @pytest.fixture
-async def mocked(aiohttp_server):
+async def mocked(aiohttp_server, socket_enabled):
     fake = FakeUpstream()
     app = web.Application()
     app.router.add_post("/v1internal:{rpc}", fake.handle)

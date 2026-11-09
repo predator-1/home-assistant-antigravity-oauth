@@ -11,7 +11,7 @@ uv venv --python 3.14 .venv && uv pip install --python .venv/bin/python -r requi
 .venv/bin/python scripts/smoke.py                                       # live, local only, uses quota
 ```
 
-Layout: `custom_components/antigravity/api/` has no Home Assistant imports (auth, catalog, client, errors, quota, schema, search, turn); Home Assistant platforms sit beside it. `tests/fixtures/` holds trimmed upstream payloads.
+Layout: `custom_components/antigravity/api/` has no Home Assistant imports (auth, catalog, client, errors, quota, schema, search, turn); Home Assistant code sits beside it ([docs/home-assistant.md](docs/home-assistant.md)). `tests/` covers `api/`, `tests/ha/` the Home Assistant side; `tests/fixtures/` holds trimmed upstream payloads.
 
 ## Rules
 
