@@ -108,6 +108,18 @@ def clean_response_schema(schema: Any) -> dict[str, Any]:
     return root
 
 
+def has_free_form_object(schema: Any) -> bool:
+    """True if any object node has no properties: upstream schemas cannot express it."""
+    if not isinstance(schema, dict):
+        return False
+    node = clean_schema_node(schema)
+    if node["type"] == "object" and not node.get("properties"):
+        return True
+    return any(has_free_form_object(v) for v in (schema.get("properties") or {}).values()) or has_free_form_object(
+        schema.get("items")
+    )
+
+
 class ToolNameMapper:
     """Map host tool names to `^[a-zA-Z_][a-zA-Z0-9_]{0,63}$` and back."""
 

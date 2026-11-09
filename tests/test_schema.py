@@ -2,6 +2,7 @@ from custom_components.antigravity.api.schema import (
     ToolNameMapper,
     clean_response_schema,
     clean_tool_parameters,
+    has_free_form_object,
 )
 
 
@@ -76,3 +77,11 @@ def test_tool_name_mapper():
     assert mapper.to_original("my_tool_v2_1") == "my_tool_v2"
     assert "HassTurnOn" in mapper
     assert "unknown" not in mapper
+
+
+def test_has_free_form_object():
+    assert has_free_form_object({"type": "object"})
+    assert has_free_form_object({"type": "object", "properties": {"rooms": {"type": "object"}}})
+    assert has_free_form_object({"type": "object", "properties": {"l": {"type": "array", "items": {"type": "object"}}}})
+    assert not has_free_form_object({"type": "object", "properties": {"a": {"type": "string"}}})
+    assert not has_free_form_object({"type": "array", "items": {"type": "integer"}})

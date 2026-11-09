@@ -59,6 +59,12 @@
     },
     "response_blocked": {
       "message": "The model stopped without an answer (reason: {reason})."
+    },
+    "no_response": {
+      "message": "The model returned no answer."
+    },
+    "invalid_json": {
+      "message": "The model did not return valid JSON for the requested structure."
     }
   },
   "config_subentries": {
@@ -83,6 +89,56 @@
             "reasoning_effort": "Higher effort thinks longer: slower replies and more quota. Models with a single level ignore this.",
             "prompt": "Instruct how the agent should respond. This can be a template.",
             "web_search": "Lets the agent search the web with Google. Each search is a separate request that uses Gemini quota."
+          }
+        }
+      },
+      "abort": {
+        "entry_not_loaded": "The Antigravity account is not loaded. Fix the account first, then try again.",
+        "reconfigure_successful": "Re-configuration was successful"
+      }
+    },
+    "ai_task_data": {
+      "initiate_flow": {
+        "user": "Add AI Task",
+        "reconfigure": "Reconfigure AI Task"
+      },
+      "entry_type": "AI Task",
+      "step": {
+        "set_options": {
+          "data": {
+            "name": "Name",
+            "chat_model": "Model",
+            "reasoning_effort": "Reasoning effort",
+            "web_search": "Google Search"
+          },
+          "data_description": {
+            "chat_model": "Models from your Antigravity subscription. Gemini models use the Gemini quota; Claude and GPT-OSS share a separate quota. Image generation always uses the subscription's image model.",
+            "reasoning_effort": "Higher effort thinks longer: slower replies and more quota. Models with a single level ignore this.",
+            "web_search": "Lets the agent search the web with Google. Each search is a separate request that uses Gemini quota."
+          }
+        }
+      },
+      "abort": {
+        "entry_not_loaded": "The Antigravity account is not loaded. Fix the account first, then try again.",
+        "reconfigure_successful": "Re-configuration was successful"
+      }
+    },
+    "stt": {
+      "initiate_flow": {
+        "user": "Add speech-to-text",
+        "reconfigure": "Reconfigure speech-to-text"
+      },
+      "entry_type": "Speech-to-text",
+      "step": {
+        "set_options": {
+          "data": {
+            "name": "Name",
+            "chat_model": "Model",
+            "prompt": "Instructions"
+          },
+          "data_description": {
+            "chat_model": "Models from your subscription that accept audio. Flash Lite is the fastest.",
+            "prompt": "Instructions sent with the recording, e.g. names or words to spell correctly."
           }
         }
       },

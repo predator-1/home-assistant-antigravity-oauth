@@ -17,7 +17,7 @@ from .coordinator import CatalogCoordinator, QuotaCoordinator
 from .session import TokenManager
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-PLATFORMS = (Platform.CONVERSATION, Platform.SENSOR)
+PLATFORMS = (Platform.AI_TASK, Platform.CONVERSATION, Platform.SENSOR, Platform.STT)
 
 
 @dataclass

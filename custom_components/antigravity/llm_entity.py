@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import base64
+import json
 import logging
 from collections.abc import AsyncGenerator, AsyncIterator
 from dataclasses import dataclass, field
@@ -30,7 +30,8 @@ from .api.errors import (
     RateLimitError,
     UnknownModelError,
 )
-from .api.schema import ToolNameMapper
+from .api.media import check_inline_size, inline_part
+from .api.schema import ToolNameMapper, has_free_form_object
 from .api.search import web_search
 from .api.turn import ToolSpec, build_request, build_tools, function_call_part, function_response_part
 from .const import (
@@ -183,9 +184,19 @@ class AntigravityLLMEntity(Entity):
         tools, mapper = build_tools(specs)
 
         response_schema = None
+        system_instruction = chat_log.content[0].content or ""
         if structure is not None:
             serializer = chat_log.llm_api.custom_serializer if chat_log.llm_api else llm.selector_serializer
-            response_schema = probatio.to_openapi(structure, custom_serializer=serializer)
+            schema = probatio.to_openapi(structure, custom_serializer=serializer)
+            if model.supports_structured_output and not has_free_form_object(schema):
+                response_schema = schema
+            else:
+                # Claude and GPT-OSS have no responseSchema upstream, and Gemini's schema cannot express
+                # objects without properties (they come back empty): ask for JSON in the prompt instead.
+                system_instruction += (
+                    "\n\nRespond with only a JSON value (no prose, no code fence) matching this JSON Schema:\n"
+                    + json.dumps(schema)
+                )
 
         client = self.entry.runtime_data.client
         try:
@@ -194,7 +205,7 @@ class AntigravityLLMEntity(Entity):
                 request = build_request(
                     model,
                     contents,
-                    system_instruction=chat_log.content[0].content or None,
+                    system_instruction=system_instruction or None,
                     tools=tools,
                     response_schema=response_schema,
                     json_output=structure is not None,
@@ -254,7 +265,8 @@ class AntigravityLLMEntity(Entity):
 
     async def _async_inline(self, path: Path, mime_type: str) -> dict[str, Any]:
         data = await self.hass.async_add_executor_job(path.read_bytes)
-        return {"inlineData": {"mimeType": mime_type, "data": base64.b64encode(data).decode("ascii")}}
+        check_inline_size(len(data))
+        return inline_part(mime_type, data)
 
     async def _transform(
         self,

@@ -25,6 +25,30 @@ One `conversation` subentry per agent (default one created at sign-in). Options:
 
 Each turn (`llm_entity.py`): Home Assistant tools (`probatio.to_openapi`) plus, when enabled, a `web_search` tool → `build_tools`; contents rebuilt from the chat log every iteration (max 10); tool results grouped into one user turn of `functionResponse` parts. Gemini thought signatures are kept in `AssistantContent.native` (`AntigravityNative`, keyed by tool-call id with the producing model id) and replayed only for the same model, else the sentinel. `web_search` calls are `ToolInput(external=True)`: the entity runs `api.search.web_search` itself on `catalog.search_model` and streams a `tool_result` delta, so search works with or without Assist (the core Google integration cannot combine its search tool with Assist). Finish reasons other than `STOP`/`MAX_TOKENS` raise `response_blocked`; quota exhaustion says when the window resets. Every turn requests a (debounced) quota refresh.
 
+## AI Task
+
+`ai_task_data` subentry (default created at sign-in, `web_search` off): `chat_model`, `reasoning_effort`, `web_search`.
+
+- `generate_data`: same chat path as conversation (`_async_handle_chat_log`, up to 100 tool iterations). With a `structure`: Gemini gets `responseSchema`, unless the schema has an object without properties (e.g. an `object` selector) — Gemini's schema cannot express it and returned `{"rooms": {}}` live; then, as for Claude and GPT-OSS, the JSON Schema goes into the system instruction (Gemini keeps `responseMimeType: application/json`). `parse_json` tolerates a code fence.
+- Attachments: read from disk and sent as `inlineData`; the whole request must stay under Gemini's ~20 MiB inline limit (`api.media.INLINE_MAX_BYTES`, checked before sending).
+- `generate_image`: offered when the catalog lists an image model; sends prompt + image attachments to `imageGenerationModelIds[0]` (`gemini-3.1-flash-image`) with `responseModalities: [TEXT, IMAGE]`, one retry on an empty reply.
+
+## Speech-to-text
+
+`stt` subentry (default created at sign-in): `chat_model` (only catalog models with an `audio/*` MIME type), `prompt`. The utterance is buffered, raw PCM is wrapped in a WAV header (the pipeline sends headerless PCM for `wav`), and sent inline with the prompt plus the pipeline language; `temperature: 0`. 16 kHz, 16-bit mono; WAV/PCM or OGG/Opus.
+
+## Live checks, phase 4 (2026-11-09, HA 2026.11.1)
+
+| check | result |
+|---|---|
+| `generate_data`, free-form `object` field | 4.7 s, three rooms with areas (after the prompt-schema fallback; before it: `{"rooms": {}}`) |
+| `generate_data`, text/number/boolean fields | 3.1 s, `{"name": "Living Room", "area_m2": 24.5, "has_window": true}` |
+| `generate_data` with a JPEG from `media-source://media_source/local/` | 8.1 s, correct one-sentence description |
+| `generate_image` | 10.1 s, JPEG (669 KB) served by HA's `/ai_task/image/…` URL |
+| STT (`/api/stt`, `say`-generated 16 kHz PCM, "Turn on the desk lamp in the living room") | 1.8 s, exact transcript |
+
+Direct transcription timing on the same clip: `gemini-3.5-flash-lite` 2.6 s, `gemini-3.8-flash-tiered` 3.0 s, `gemini-3.8-flash-low` 3.3 s, all exact; the STT default is flash-lite.
+
 ## Latency
 
 Live, HA 2026.11.1, Assist API, one exposed `input_boolean`, "Turn on/off the desk lamp" (two runs each, 2026-11-09):

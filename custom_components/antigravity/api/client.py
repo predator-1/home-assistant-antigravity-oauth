@@ -113,6 +113,18 @@ def _check_native_tools(payload: Mapping[str, Any]) -> None:
                 raise UpstreamError("native tools offered")
 
 
+async def _sse_lines(content: aiohttp.StreamReader) -> AsyncIterator[bytes]:
+    """Split the body into lines without aiohttp's 512 KiB line limit (image parts are larger)."""
+    buffer = b""
+    async for chunk in content.iter_any():
+        buffer += chunk
+        *lines, buffer = buffer.split(b"\n")
+        for line in lines:
+            yield line
+    if buffer:
+        yield buffer
+
+
 class AntigravityClient:
     def __init__(
         self,
@@ -215,7 +227,7 @@ class AntigravityClient:
             finish_reason = ""
             grounding: Mapping[str, Any] | None = None
             call_index = 0
-            async for line in resp.content:
+            async for line in _sse_lines(resp.content):
                 line = line.strip()
                 if not line.startswith(b"data:"):
                     continue

@@ -262,3 +262,11 @@ async def test_web_search(client, mocked):
     body = mocked.requests[STREAM][0][0]
     assert body["request"]["tools"] == [{"googleSearch": {}}]
     assert body["request"]["contents"][0]["parts"][0]["text"].startswith("who won?\n\nSearch recency")
+
+
+async def test_large_sse_line(client, mocked):
+    big = "A" * 800_000
+    mocked.post(STREAM, body=sse(chunk({"inlineData": {"mimeType": "image/jpeg", "data": big}}, finish="STOP")))
+    events = await collect(client)
+    assert isinstance(events[0], InlineData)
+    assert len(events[0].data) == 600_000

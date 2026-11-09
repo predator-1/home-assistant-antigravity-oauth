@@ -46,3 +46,11 @@ Tool calls (one `get_weather` tool):
 - Claude: `functionCall {name, args, id: "toolu_vrtx_…"}`, no signature; replay without one: 200.
 
 Google Search: `tools: [{googleSearch: {}}]` returns text and `groundingMetadata` (`webSearchQueries`, `groundingChunks[].web {uri,title}`) on `gemini-3.8-flash-tiered`, `gemini-3.8-flash-low` and `gemini-3.5-flash-lite`; flash-lite is ~5× faster ([latency](home-assistant.md#latency)).
+
+## Image generation (2026-11-09)
+
+`gemini-3.1-flash-image`, `generationConfig.responseModalities: ["TEXT", "IMAGE"]`, prompt only: 200 in 13 s, one `inlineData` `image/jpeg` part (~1 MB) and no text. The whole part arrives as **one SSE `data:` line larger than 512 KiB**, which overflows aiohttp's `StreamReader` line limit (`LineTooLong`); `client._sse_lines` splits the body itself.
+
+## Audio input (2026-11-09)
+
+A 2.3 s, 16 kHz 16-bit mono WAV sent as `inlineData` `audio/wav` with a "transcribe verbatim" prompt and `temperature: 0` was transcribed exactly by `gemini-3.5-flash-lite` (2.6 s), `gemini-3.8-flash-tiered` (3.0 s) and `gemini-3.8-flash-low` (3.3 s).
