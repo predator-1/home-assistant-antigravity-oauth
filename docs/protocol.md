@@ -45,4 +45,4 @@ Tool calls (one `get_weather` tool):
 - Gemini: `functionCall {name, args, id: "call_<digits>"}` with `thoughtSignature` (≈360 chars) on the same part. Replaying that part with a `functionResponse` (same `id`): 200. Replaying without a signature: **400** `Function call is missing a thought_signature in functionCall parts`. Replaying with `skip_thought_signature_validator`: 200 on `gemini-3.8-flash-low` and `gemini-4-argon-low`. This settles the plugin's open "live multi-step prove".
 - Claude: `functionCall {name, args, id: "toolu_vrtx_…"}`, no signature; replay without one: 200.
 
-Google Search: `gemini-3.8-flash-tiered` + `tools: [{googleSearch: {}}]` returns text and `groundingMetadata` (`webSearchQueries`, `groundingChunks[].web {uri,title}`) — verified via `scripts/smoke.py`.
+Google Search: `tools: [{googleSearch: {}}]` returns text and `groundingMetadata` (`webSearchQueries`, `groundingChunks[].web {uri,title}`) on `gemini-3.8-flash-tiered`, `gemini-3.8-flash-low` and `gemini-3.5-flash-lite`; flash-lite is ~5× faster ([latency](home-assistant.md#latency)).

@@ -47,6 +47,11 @@ async def test_sign_in_creates_entry(hass, mock_sign_in):
     assert data[CONF_REFRESH_TOKEN] == "refresh-2"
     assert data[CONF_PROJECT_ID] == "proj-1"
     assert exchange.await_args.args[2] == "4/abc"
+    [agent] = result["result"].subentries.values()
+    assert agent.subentry_type == "conversation"
+    assert agent.data["chat_model"] == "gemini-3.5-flash-lite"
+    assert agent.data["web_search"] is True
+    assert agent.data["llm_hass_api"] == ["assist"]
 
 
 async def test_state_mismatch_shows_error_and_new_url(hass, mock_sign_in):

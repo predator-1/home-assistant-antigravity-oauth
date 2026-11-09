@@ -20,6 +20,20 @@ CONF_EMAIL = "email"
 CONF_TIER = "tier"
 CONF_REDIRECT_URL = "redirect_url"
 
+# Subentry options
+CONF_CHAT_MODEL = "chat_model"
+CONF_REASONING_EFFORT = "reasoning_effort"
+CONF_WEB_SEARCH = "web_search"
+
+SUBENTRY_CONVERSATION = "conversation"
+DEFAULT_CONVERSATION_NAME = "Antigravity conversation"
+RECOMMENDED_CHAT_MODEL = "gemini-3.5-flash-lite"
+"""Fastest for Assist (~1.5 s per command; docs/home-assistant.md#latency)."""
+RECOMMENDED_REASONING_EFFORT = "low"
+"""Used by models with effort variants; low keeps replies fast."""
+REASONING_EFFORTS = ("low", "medium", "high")
+WEB_SEARCH_TOOL = "web_search"
+
 CLI_VERSION = "1.5.3"
 
 DEFAULT_PROJECT_ID = "default-cli-project"

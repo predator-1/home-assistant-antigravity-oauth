@@ -14,6 +14,7 @@ def test_models_from_routing_lists(models_payload):
     assert catalog.default_model == "gemini-4-argon"
     assert catalog.image_models == ("gemini-3.1-flash-image",)
     assert catalog.flash_model == "gemini-3.8-flash-tiered"
+    assert catalog.search_model == "gemini-3.5-flash-lite"
 
 
 def test_effort_variants_and_names(models_payload):
@@ -57,3 +58,4 @@ def test_empty_payload_invents_nothing():
     assert catalog.models == ()
     assert catalog.default_model is None
     assert catalog.flash_model is None
+    assert catalog.search_model is None

@@ -67,7 +67,9 @@ class Catalog:
     default_model: str | None = None
     image_models: tuple[str, ...] = ()
     flash_model: str | None = None
-    """Upstream id for search grounding and media understanding (`tieredModelIds.flash`)."""
+    """Upstream id for media understanding (`tieredModelIds.flash`)."""
+    search_model: str | None = None
+    """Upstream id for search grounding (`webSearchModelIds`, else `flash_model`)."""
 
     def get(self, model_id: str) -> ChatModel | None:
         return next((m for m in self.models if m.id == model_id), None)
@@ -152,9 +154,11 @@ def parse_catalog(payload: Mapping[str, Any]) -> Catalog:
     default = payload.get("defaultAgentModelId")
     default_family = _family(default)[0] if isinstance(default, str) else None
     flash = _ids((payload.get("tieredModelIds") or {}).get("flash"))
+    search = _ids(payload.get("webSearchModelIds"))
     return Catalog(
         models=models,
         default_model=default_family if any(m.id == default_family for m in models) else None,
         image_models=tuple(_ids(payload.get("imageGenerationModelIds"))),
         flash_model=flash[0] if flash else None,
+        search_model=search[0] if search else (flash[0] if flash else None),
     )

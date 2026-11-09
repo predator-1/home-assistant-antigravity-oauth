@@ -1,7 +1,8 @@
 """Google Search grounding as a separate request.
 
 Port of openclaw-antigravity-oauth src/search.ts. The chat turn never gets `googleSearch`;
-the agent calls a search tool, which runs this one grounded request on the flash model.
+the agent calls a search tool, which runs this one grounded request on upstream's search
+model (`webSearchModelIds`: flash-lite, ~1.5 s vs ~8.5 s on flash; docs/protocol.md).
 """
 
 from __future__ import annotations

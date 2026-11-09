@@ -44,6 +44,61 @@
     },
     "update_failed": {
       "message": "Error talking to Antigravity: {error}"
+    },
+    "quota_exhausted": {
+      "message": "Your Antigravity quota for this model is used up until {reset}. Pick a model from another quota group or wait."
+    },
+    "sign_in_required": {
+      "message": "Antigravity needs you to sign in again (Settings → Devices & services)."
+    },
+    "upstream_error": {
+      "message": "Antigravity request failed: {error}"
+    },
+    "model_unavailable": {
+      "message": "The selected model is not in your Antigravity subscription right now."
+    },
+    "response_blocked": {
+      "message": "The model stopped without an answer (reason: {reason})."
+    }
+  },
+  "config_subentries": {
+    "conversation": {
+      "initiate_flow": {
+        "user": "Add conversation agent",
+        "reconfigure": "Reconfigure conversation agent"
+      },
+      "entry_type": "Conversation agent",
+      "step": {
+        "set_options": {
+          "data": {
+            "name": "Name",
+            "chat_model": "Model",
+            "reasoning_effort": "Reasoning effort",
+            "prompt": "Instructions",
+            "llm_hass_api": "Control Home Assistant",
+            "web_search": "Google Search"
+          },
+          "data_description": {
+            "chat_model": "Models from your Antigravity subscription. Gemini models use the Gemini quota; Claude and GPT-OSS share a separate quota.",
+            "reasoning_effort": "Higher effort thinks longer: slower replies and more quota. Models with a single level ignore this.",
+            "prompt": "Instruct how the agent should respond. This can be a template.",
+            "web_search": "Lets the agent search the web with Google. Each search is a separate request that uses Gemini quota."
+          }
+        }
+      },
+      "abort": {
+        "entry_not_loaded": "The Antigravity account is not loaded. Fix the account first, then try again.",
+        "reconfigure_successful": "Re-configuration was successful"
+      }
+    }
+  },
+  "selector": {
+    "reasoning_effort": {
+      "options": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      }
     }
   }
 }
