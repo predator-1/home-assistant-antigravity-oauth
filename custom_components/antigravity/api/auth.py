@@ -15,21 +15,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 import aiohttp
 
 from .. import const
-
-
-class AuthError(Exception):
-    """Sign-in or refresh failed."""
-
-
-class NotEligibleError(AuthError):
-    """The account has no Antigravity subscription tier."""
-
-    def __init__(self) -> None:
-        super().__init__("subscription not eligible")
-
-
-class InvalidGrantError(AuthError):
-    """The refresh token is revoked or expired; the user must sign in again."""
+from .errors import AuthError, InvalidGrantError, NotEligibleError
 
 
 @dataclass(frozen=True)
@@ -96,9 +82,7 @@ def parse_callback_input(raw: str, expected_state: str) -> str:
 
 async def _token_request(session: aiohttp.ClientSession, data: dict[str, str]) -> dict[str, Any]:
     data = {"client_id": const.CLIENT_ID, "client_secret": const.CLIENT_SECRET, **data}
-    async with session.post(
-        const.TOKEN_URL, data=data, headers={"Accept": "application/json"}
-    ) as resp:
+    async with session.post(const.TOKEN_URL, data=data, headers={"Accept": "application/json"}) as resp:
         body: dict[str, Any] = await resp.json(content_type=None)
         if resp.status >= 400 or "error" in body:
             error = body.get("error", f"HTTP {resp.status}")
@@ -124,9 +108,7 @@ async def exchange_code(session: aiohttp.ClientSession, pkce: PkceSession, code:
 
 
 async def refresh(session: aiohttp.ClientSession, refresh_token: str) -> Tokens:
-    body = await _token_request(
-        session, {"grant_type": "refresh_token", "refresh_token": refresh_token}
-    )
+    body = await _token_request(session, {"grant_type": "refresh_token", "refresh_token": refresh_token})
     if not body.get("access_token"):
         raise AuthError("Refresh failed: incomplete token response")
     return Tokens(
@@ -175,9 +157,7 @@ async def check_eligibility(session: aiohttp.ClientSession, access_token: str) -
         raise NotEligibleError
 
     email = None
-    async with session.get(
-        const.USERINFO_URL, headers={"Authorization": f"Bearer {access_token}"}
-    ) as resp:
+    async with session.get(const.USERINFO_URL, headers={"Authorization": f"Bearer {access_token}"}) as resp:
         if resp.status == 200:
             email = ((await resp.json(content_type=None)).get("email") or "").strip() or None
     return Eligibility(project_id=project_id or const.DEFAULT_PROJECT_ID, email=email, tier=tier)

@@ -63,16 +63,17 @@ async def login_finish(session: aiohttp.ClientSession, pasted: str) -> None:
         },
     )
     PKCE_FILE.unlink()
-    print(f"signed in; tier={elig.tier} email={'yes' if elig.email else 'no'} "
-          f"managed_project={elig.project_id != const.DEFAULT_PROJECT_ID} expires_in={tokens.expires_in}s")
+    print(
+        f"signed in; tier={elig.tier} email={'yes' if elig.email else 'no'} "
+        f"managed_project={elig.project_id != const.DEFAULT_PROJECT_ID} expires_in={tokens.expires_in}s"
+    )
 
 
 async def _access(session: aiohttp.ClientSession, force: bool = False) -> dict:
     stored = json.loads(TOKEN_FILE.read_text())
     if force or stored["expires"] - time.time() < 60:
         tokens = await auth.refresh(session, stored["refresh"])
-        stored.update(access=tokens.access_token, refresh=tokens.refresh_token,
-                      expires=time.time() + tokens.expires_in)
+        stored.update(access=tokens.access_token, refresh=tokens.refresh_token, expires=time.time() + tokens.expires_in)
         _save(TOKEN_FILE, stored)
         print(f"refreshed; expires_in={tokens.expires_in}s")
     return stored
@@ -135,8 +136,13 @@ async def pong(
 
 async def main() -> None:
     cmd, *args = sys.argv[1:] or ["help"]
-    commands = {"device-code": device_code, "login-url": login_url, "login-finish": login_finish,
-                "refresh": refresh, "pong": pong}
+    commands = {
+        "device-code": device_code,
+        "login-url": login_url,
+        "login-finish": login_finish,
+        "refresh": refresh,
+        "pong": pong,
+    }
     if cmd not in commands:
         print(__doc__)
         return

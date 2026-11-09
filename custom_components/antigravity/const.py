@@ -42,7 +42,15 @@ OAUTH_SCOPES = " ".join(
 )
 
 _GO_OS = {"win32": "windows", "sunos": "solaris"}
-_GO_ARCH = {"x86_64": "amd64", "amd64": "amd64", "aarch64": "arm64", "arm64": "arm64", "i386": "386", "i686": "386", "armv7l": "arm"}
+_GO_ARCH = {
+    "x86_64": "amd64",
+    "amd64": "amd64",
+    "aarch64": "arm64",
+    "arm64": "arm64",
+    "i386": "386",
+    "i686": "386",
+    "armv7l": "arm",
+}
 
 
 def build_user_agent(system: str | None = None, machine: str | None = None) -> str:
