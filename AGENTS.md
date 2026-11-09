@@ -9,9 +9,14 @@ uv venv --python 3.14 .venv && uv pip install --python .venv/bin/python -r requi
 .venv/bin/python -m ruff format . && .venv/bin/python -m ruff check .   # before every commit
 .venv/bin/python -m pytest -q                                           # hermetic, no network
 .venv/bin/python scripts/smoke.py                                       # live, local only, uses quota
+.venv/bin/python scripts/sync_upstream.py                               # compare const.py with the plugin (docs/upstream-sync.md)
 ```
 
 Layout: `custom_components/antigravity/api/` has no Home Assistant imports (auth, catalog, client, errors, quota, schema, search, turn); Home Assistant code sits beside it ([docs/home-assistant.md](docs/home-assistant.md)). `tests/` covers `api/`, `tests/ha/` the Home Assistant side; `tests/fixtures/` holds trimmed upstream payloads.
+
+## Release
+
+Bump `version` in `custom_components/antigravity/manifest.json`, add a `CHANGELOG.md` section, merge to `main`, then tag `v<version>` on `main`. `.github/workflows/release.yml` checks the tag against the manifest, runs the tests and publishes `antigravity.zip` (HACS `zip_release`). Icon: `scripts/make_icon.py` renders `brand/icon.png` and `icon@2x.png` (original artwork; never use Google or Antigravity marks).
 
 ## Rules
 

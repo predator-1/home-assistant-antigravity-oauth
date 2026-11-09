@@ -1,6 +1,6 @@
 """Render the integration icon (original artwork, no third-party marks).
 
-  .tmp/havenv/bin/python scripts/make_icon.py
+.tmp/havenv/bin/python scripts/make_icon.py
 """
 
 from pathlib import Path
@@ -18,7 +18,9 @@ def render() -> Image.Image:
     top, bottom = (58, 76, 214), (146, 72, 222)
     for y in range(S):
         t = y / (S - 1)
-        gradient.paste(tuple(round(a + (b - a) * t) for a, b in zip(top, bottom, strict=True)) + (255,), (0, y, S, y + 1))
+        gradient.paste(
+            (*tuple(round(a + (b - a) * t) for a, b in zip(top, bottom, strict=True)), 255), (0, y, S, y + 1)
+        )
     mask = Image.new("L", (S, S), 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, S - 1, S - 1), radius=S // 5, fill=255)
     img.paste(gradient, (0, 0), mask)

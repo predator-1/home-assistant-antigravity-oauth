@@ -1,0 +1,37 @@
+name: Upstream sync check
+
+on:
+  schedule:
+    - cron: "43 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare with the OpenClaw plugin's constants
+        id: sync
+        run: |
+          set +e
+          python3 scripts/sync_upstream.py > report.txt
+          echo "verdict=$?" >> "$GITHUB_OUTPUT"
+          cat report.txt
+      - name: Open an issue when constants drifted
+        if: steps.sync.outputs.verdict == '10' || steps.sync.outputs.verdict == '20'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Upstream constants changed in openclaw-antigravity-oauth"
+          if [ -z "$(gh issue list --state open --search "$title in:title" --json number --jq '.[].number')" ]; then
+            { echo "\`scripts/sync_upstream.py\` reported:"; echo; echo '```'; cat report.txt; echo '```';
+              echo; echo "Verdict 10: run \`python scripts/sync_upstream.py --apply\`. Verdict 20: review docs/upstream-sync.md."; } > body.md
+            gh issue create --title "$title" --body-file body.md
+          fi
+      - name: Fail on errors
+        if: steps.sync.outputs.verdict == '30'
+        run: exit 1
