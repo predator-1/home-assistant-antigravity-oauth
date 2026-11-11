@@ -2,6 +2,10 @@
 
 Domain `antigravity`, HACS only, minimum Home Assistant 2026.10 (test harness `pytest-homeassistant-custom-component` 0.13.375 = HA 2026.10.4; live-checked on 2026.11.1).
 
+## Distribution (2026-11-11)
+
+Home Assistant 2026.11 ships HACS as the core integration `marketplace` ("Marketplace", `homeassistant/components/marketplace`). On first start it adopts an existing `custom_components/hacs` install (`migration.py`: config entry, registries, issues) and the custom copy is removed; `/hacs/...` redirects to `/marketplace/...`. It keeps HACS's model: `hacs.json`, custom repositories, release zips. Observed on the maintainer's 2026.11.1 container: after copying HACS 2.0.5 into `custom_components/hacs` and restarting, `custom_components/` was empty and a `marketplace` config entry with `marketplace.*` storage existed. This integration needs no change for it.
+
 ## Config entry
 
 - One entry per Google account; `unique_id` = lowercased email (project id if userinfo returned none); title = email.
