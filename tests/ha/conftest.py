@@ -68,6 +68,10 @@ def mock_client(catalog, quota):
             "custom_components.antigravity.api.client.AntigravityClient.fetch_quota",
             new=AsyncMock(return_value=quota),
         ) as fetch_quota,
+        patch(
+            "custom_components.antigravity.api.client.AntigravityClient.fetch_plan",
+            new=AsyncMock(return_value="Google AI Pro"),
+        ),
     ):
         yield fetch_catalog, fetch_quota
 
@@ -81,7 +85,7 @@ def mock_sign_in():
         ) as exchange,
         patch(
             "custom_components.antigravity.api.auth.check_eligibility",
-            new=AsyncMock(return_value=Eligibility(project_id="proj-1", email=EMAIL, tier="free-tier")),
+            new=AsyncMock(return_value=Eligibility(project_id="proj-1", email=EMAIL, tier="Google AI Pro")),
         ) as eligibility,
     ):
         yield exchange, eligibility

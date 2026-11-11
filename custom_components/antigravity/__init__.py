@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -12,9 +14,12 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api.client import AntigravityClient
-from .const import CONF_PROJECT_ID, DOMAIN
+from .api.errors import AntigravityError
+from .const import CONF_PROJECT_ID, CONF_TIER, DOMAIN
 from .coordinator import CatalogCoordinator, QuotaCoordinator
 from .session import TokenManager
+
+_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 PLATFORMS = (Platform.AI_TASK, Platform.CONVERSATION, Platform.SENSOR, Platform.STT)
@@ -44,11 +49,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: AntigravityConfigEntry) 
     quota = QuotaCoordinator(hass, entry, client)
     await catalog.async_config_entry_first_refresh()
     await quota.async_config_entry_first_refresh()
+    await _async_refresh_plan(hass, entry, client)
     entry.runtime_data = AntigravityData(client, catalog, quota, _subentry_snapshot(entry))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_entry_updated))
     return True
+
+
+async def _async_refresh_plan(hass: HomeAssistant, entry: ConfigEntry, client: AntigravityClient) -> None:
+    """Keep the plan shown as the device model current (it changes on upgrade or cancel)."""
+    try:
+        plan = await client.fetch_plan()
+    except (AntigravityError, aiohttp.ClientError, TimeoutError) as err:
+        _LOGGER.debug("Plan refresh failed: %s", err)
+        return
+    if plan and plan != entry.data.get(CONF_TIER):
+        hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_TIER: plan})
 
 
 async def _async_entry_updated(hass: HomeAssistant, entry: AntigravityConfigEntry) -> None:
