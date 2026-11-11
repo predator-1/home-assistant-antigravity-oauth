@@ -1,4 +1,4 @@
-"""Print the CHANGELOG.md section for a version: python scripts/release_notes.py 0.1.0"""
+"""Print the CHANGELOG.md section for a version: python scripts/release_notes.py 1.5.300"""
 
 import re
 import sys
