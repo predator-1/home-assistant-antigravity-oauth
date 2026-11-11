@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.301
+
+- The account device shows the subscription plan (for example Google AI Pro) instead of `free-tier`. Google reports the plan separately from the Antigravity tier; the plan is now read from there and refreshed on every start, so existing installs update without signing in again.
+
 ## 1.5.300
 
 First release, for agy 1.5.3.

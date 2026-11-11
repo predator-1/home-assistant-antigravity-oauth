@@ -9,7 +9,7 @@ Home Assistant 2026.11 ships HACS as the core integration `marketplace` ("Market
 ## Config entry
 
 - One entry per Google account; `unique_id` = lowercased email (project id if userinfo returned none); title = email.
-- `data`: `access_token`, `refresh_token`, `expires_at` (epoch s), `project_id`, `email`, `tier`. Nothing in `options`.
+- `data`: `access_token`, `refresh_token`, `expires_at` (epoch s), `project_id`, `email`, `tier` (plan name, refreshed at setup; [auth.md](auth.md#tiers-2026-11-11)). Nothing in `options`.
 - Setup (`__init__.py`): `TokenManager` (`session.py`) → `AntigravityClient` → `CatalogCoordinator` (6 h) and `QuotaCoordinator` (5 min); both first refreshes must succeed. `runtime_data` = `AntigravityData`.
 - Errors: `AuthError` → `ConfigEntryAuthFailed` (reauth flow); network / other upstream errors → `UpdateFailed` (`SETUP_RETRY` at startup).
 
@@ -72,7 +72,7 @@ Live checks in the same run: both Gemini 3.8 Flash and Claude Sonnet agents turn
 
 ## Entities
 
-Account device (service, manufacturer Google, model = tier). Per quota window (`QuotaWindow.key` = upstream `bucketId`): `… remaining` (%, measurement) and `… reset` (timestamp). Names come from translation placeholders `{group} {window}`, e.g. `sensor.antigravity_gemini_models_weekly_remaining`.
+Account device (service, manufacturer Google, model = plan, e.g. Google AI Pro). Per quota window (`QuotaWindow.key` = upstream `bucketId`): `… remaining` (%, measurement) and `… reset` (timestamp). Names come from translation placeholders `{group} {window}`, e.g. `sensor.antigravity_gemini_models_weekly_remaining`.
 
 ## Live check (2026-11-09, HA 2026.11.1, macOS arm64)
 

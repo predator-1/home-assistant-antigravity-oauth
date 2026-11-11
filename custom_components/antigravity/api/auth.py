@@ -52,6 +52,7 @@ class Eligibility:
     project_id: str
     email: str | None
     tier: str | None
+    """Plan name for display, e.g. "Google AI Pro" (see `plan_name`)."""
 
 
 def new_pkce_session() -> PkceSession:
@@ -136,11 +137,30 @@ def _project_id(raw: Any) -> str | None:
     return None
 
 
+def _tier(raw: Any) -> str | None:
+    if not isinstance(raw, dict):
+        return None
+    return next((v.strip() for k in ("name", "id") if isinstance(v := raw.get(k), str) and v.strip()), None)
+
+
+def plan_name(load_code_assist: dict[str, Any]) -> str | None:
+    """The subscription plan from a `loadCodeAssist` response.
+
+    `currentTier` is the Antigravity tier (`free-tier` even for subscribers); a Google AI
+    subscription is reported separately in `paidTier` (docs/auth.md#tiers).
+    """
+    return _tier(load_code_assist.get("paidTier")) or _tier(load_code_assist.get("currentTier"))
+
+
+def load_code_assist_body() -> dict[str, Any]:
+    return {"metadata": {"ideType": "ANTIGRAVITY"}}
+
+
 async def check_eligibility(session: aiohttp.ClientSession, access_token: str) -> Eligibility:
     """loadCodeAssist; raises NotEligibleError when the account has no tier."""
     async with session.post(
         const.LOAD_CODE_ASSIST_URL,
-        json={"metadata": {"ideType": "ANTIGRAVITY"}},
+        json=load_code_assist_body(),
         headers=const.build_api_headers(access_token),
     ) as resp:
         if resp.status in (401, 403):
@@ -152,7 +172,7 @@ async def check_eligibility(session: aiohttp.ClientSession, access_token: str) -
     if data.get("eligible") is False:
         raise NotEligibleError
     project_id = _project_id(data.get("cloudaicompanionProject"))
-    tier = ((data.get("currentTier") or {}).get("id") or "").strip() or None
+    tier = plan_name(data)
     if data.get("eligible") is not True and not project_id and not tier and not data.get("allowedTiers"):
         raise NotEligibleError
 

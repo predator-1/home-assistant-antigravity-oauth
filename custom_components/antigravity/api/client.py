@@ -18,6 +18,7 @@ from typing import Any
 import aiohttp
 
 from .. import const
+from .auth import load_code_assist_body, plan_name
 from .catalog import Catalog, parse_catalog
 from .errors import (
     AuthError,
@@ -193,6 +194,9 @@ class AntigravityClient:
 
     async def fetch_quota(self) -> list[QuotaWindow]:
         return parse_quota_summary(await self._post_json(f"{self._api_base}:retrieveUserQuotaSummary", {}))
+
+    async def fetch_plan(self) -> str | None:
+        return plan_name(await self._post_json(f"{self._api_base}:loadCodeAssist", load_code_assist_body()))
 
     async def stream_generate(
         self,

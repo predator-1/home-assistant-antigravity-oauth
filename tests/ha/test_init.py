@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import aiohttp
 from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntryState
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from custom_components.antigravity.api.auth import Tokens
@@ -12,6 +13,7 @@ from custom_components.antigravity.const import (
     CONF_ACCESS_TOKEN,
     CONF_EXPIRES_AT,
     CONF_REFRESH_TOKEN,
+    CONF_TIER,
     DOMAIN,
 )
 from custom_components.antigravity.diagnostics import async_get_config_entry_diagnostics
@@ -33,6 +35,25 @@ async def test_setup_creates_quota_sensors(hass, config_entry, mock_client):
 
     assert await hass.config_entries.async_unload(config_entry.entry_id)
     assert config_entry.state is ConfigEntryState.NOT_LOADED
+
+
+async def test_setup_refreshes_plan(hass, config_entry, mock_client):
+    assert config_entry.data[CONF_TIER] == "free-tier"
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert config_entry.data[CONF_TIER] == "Google AI Pro"
+    devices = dr.async_entries_for_config_entry(dr.async_get(hass), config_entry.entry_id)
+    assert [d.model for d in devices if (DOMAIN, config_entry.entry_id) in d.identifiers] == ["Google AI Pro"]
+
+
+async def test_setup_plan_error_keeps_stored_plan(hass, config_entry, mock_client):
+    with patch(
+        "custom_components.antigravity.api.client.AntigravityClient.fetch_plan",
+        new=AsyncMock(side_effect=aiohttp.ClientError()),
+    ):
+        assert await hass.config_entries.async_setup(config_entry.entry_id)
+    assert config_entry.state is ConfigEntryState.LOADED
+    assert config_entry.data[CONF_TIER] == "free-tier"
 
 
 async def test_setup_auth_error_starts_reauth(hass, config_entry, mock_client):
