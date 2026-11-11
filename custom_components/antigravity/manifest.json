@@ -1,14 +1,21 @@
 {
   "domain": "antigravity",
   "name": "Antigravity",
-  "after_dependencies": ["assist_pipeline", "intent"],
-  "codeowners": ["@predator-1"],
+  "after_dependencies": [
+    "assist_pipeline",
+    "intent"
+  ],
+  "codeowners": [
+    "@predator-1"
+  ],
   "config_flow": true,
-  "dependencies": ["conversation"],
+  "dependencies": [
+    "conversation"
+  ],
   "documentation": "https://github.com/predator-1/home-assistant-antigravity-oauth",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/predator-1/home-assistant-antigravity-oauth/issues",
   "requirements": [],
-  "version": "0.1.0"
+  "version": "1.5.300"
 }

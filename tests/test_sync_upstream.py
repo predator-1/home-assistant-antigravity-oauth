@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,3 +41,17 @@ def test_own_constants_parse_and_verdicts():
     verdict, changed = sync.compare({**ours, "cli_version": "9.9.9", "client_id": "other"}, ours)
     assert verdict == 20
     assert set(changed) == {"cli_version", "client_id"}
+
+
+def test_integration_version():
+    assert sync.integration_version("1.5.3") == "1.5.300"
+    assert sync.integration_version("1.5.3", 1) == "1.5.301"
+    assert sync.integration_version("1.4.12") == "1.4.1200"
+
+
+def test_manifest_version_follows_cli_version():
+    """Contract (docs/upstream-sync.md#versioning): <agy>.<patch*100 + fix>."""
+    manifest = json.loads(sync.MANIFEST.read_text())
+    cli = sync.parse_const(sync.CONST.read_text())["cli_version"]
+    major, minor, patch = manifest["version"].split(".")
+    assert f"{major}.{minor}.{int(patch) // 100}" == cli

@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.0
+## 1.5.300
 
-First release.
+First release, for agy 1.5.3.
 
 - Sign-in with the Google account that has the Antigravity subscription: open the sign-in link, paste the redirect URL. Reauth when the refresh token is revoked.
 - Quota sensors: remaining percent and reset time for each usage window.

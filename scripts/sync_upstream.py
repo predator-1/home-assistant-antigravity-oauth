@@ -2,7 +2,8 @@
 
   python scripts/sync_upstream.py [--plugin-constants PATH_OR_URL] [--apply] [--json]
 
-Exit codes: 0 no change, 10 only CLI_VERSION changed (safe; --apply writes it),
+Exit codes: 0 no change, 10 only CLI_VERSION changed (safe; --apply writes it and sets the
+manifest version to <agyMajor>.<agyMinor>.<agyPatch*100>, docs/upstream-sync.md#versioning),
 20 OAuth client, scopes, redirect or endpoints changed (review by hand), 30 error.
 Secrets are never printed; the client secret is compared by SHA-256.
 """
@@ -19,6 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONST = ROOT / "custom_components" / "antigravity" / "const.py"
+MANIFEST = ROOT / "custom_components" / "antigravity" / "manifest.json"
 DEFAULT_SOURCE = "https://raw.githubusercontent.com/predator-1/openclaw-antigravity-oauth/main/src/constants.ts"
 
 FIELDS = ("cli_version", "client_id", "client_secret_sha256", "redirect_uri", "scopes", "api_hosts")
@@ -59,6 +61,14 @@ def parse_const(py: str) -> dict[str, object]:
     }
 
 
+def integration_version(cli_version: str, fix: int = 0) -> str:
+    """agy 1.5.3 -> 1.5.300; plugin-only fixes count up the last two digits (same as the plugin)."""
+    major, minor, patch = (int(p) for p in cli_version.split("."))
+    if not 0 <= fix <= 99:
+        raise ValueError("fix must be 0..99")
+    return f"{major}.{minor}.{patch * 100 + fix}"
+
+
 def compare(plugin: dict[str, object], ours: dict[str, object]) -> tuple[int, dict[str, tuple[object, object]]]:
     changed = {f: (ours[f], plugin[f]) for f in FIELDS if ours[f] != plugin[f]}
     if not changed:
@@ -92,6 +102,9 @@ def main() -> int:
         CONST.write_text(
             re.sub(r'CLI_VERSION = "[^"]+"', f'CLI_VERSION = "{plugin["cli_version"]}"', const_text, count=1)
         )
+        manifest = json.loads(MANIFEST.read_text())
+        manifest["version"] = integration_version(str(plugin["cli_version"]))
+        MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")
         applied = True
     if args.json:
         print(json.dumps({"verdict": verdict, "changed": changed, "applied": applied}, indent=2))
@@ -101,7 +114,7 @@ def main() -> int:
         for field, (old, new) in changed.items():
             print(f"  {field}: {old} -> {new}")
         if applied:
-            print(f"  applied: CLI_VERSION = {plugin['cli_version']}")
+            print(f"  applied: CLI_VERSION = {plugin['cli_version']}, version = {manifest['version']}")
     return verdict
 
 

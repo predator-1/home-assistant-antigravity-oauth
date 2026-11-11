@@ -16,7 +16,7 @@ Layout: `custom_components/antigravity/api/` has no Home Assistant imports (auth
 
 ## Release
 
-Bump `version` in `custom_components/antigravity/manifest.json`, add a `CHANGELOG.md` section, merge to `main`, then tag `v<version>` on `main`. `.github/workflows/release.yml` checks the tag against the manifest, runs the tests and publishes `antigravity.zip` (HACS `zip_release`). Icon: `scripts/make_icon.py` renders `brand/icon.png` and `icon@2x.png` (original artwork; never use Google or Antigravity marks).
+Version = agy version with the patch ×100 plus fix (agy 1.5.3 → `1.5.300`, fixes `1.5.301`…; [docs/upstream-sync.md](docs/upstream-sync.md#versioning)). Bump `version` in `custom_components/antigravity/manifest.json`, add a `CHANGELOG.md` section, merge to `main`, then tag `v<version>` on `main`. `.github/workflows/release.yml` checks the tag against the manifest, runs the tests and publishes `antigravity.zip` (HACS `zip_release`). Icon: `scripts/make_icon.py` renders `brand/icon.png` and `icon@2x.png` (original artwork; never use Google or Antigravity marks).
 
 ## Rules
 
