@@ -5,10 +5,17 @@
     "assist_pipeline",
     "intent"
   ],
+  "categories": [
+    "ai_voice.ai_models",
+    "ai_voice.speech"
+  ],
   "codeowners": [
     "@predator-1"
   ],
   "config_flow": true,
+  "connectivity": [
+    "cloud"
+  ],
   "dependencies": [
     "conversation"
   ],
